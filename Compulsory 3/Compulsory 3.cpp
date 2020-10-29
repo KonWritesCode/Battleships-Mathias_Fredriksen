@@ -687,7 +687,7 @@ int main()
     Login();
     
     srand(time(NULL));
-    //Play2();
+    ///Play2();
     while (true)
     {
         Menu();
