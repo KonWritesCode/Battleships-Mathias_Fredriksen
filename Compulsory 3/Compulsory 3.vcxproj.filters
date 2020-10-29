@@ -18,19 +18,8 @@
     <ClCompile Include="Compulsory 3.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Battleships.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Battleships.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="D:\Compulsory3Password.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
     <Text Include="Password.txt">
       <Filter>Resource Files</Filter>
     </Text>

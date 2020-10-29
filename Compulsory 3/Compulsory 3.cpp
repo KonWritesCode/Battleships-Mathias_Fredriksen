@@ -28,7 +28,6 @@ std::string NewPassword()
     int inputPosY{0};
     int confirmedPassword{0}; // 0 = player has not yet confirmed the new password; 1 = New password has been set but not yet confirmed twice; 2 = Password and new password has been confirmed
     
-    //"\u001b[96m" + text + "\u001b[0m";
     char letter;
     while(confirmedPassword < 2)
     {
@@ -558,9 +557,202 @@ void shoot(char board[M][N], bool ships[M][N], int &numberOfShots, int &numberOf
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
 
-void shootAI()
-{
 
+bool hit{ false };
+std::vector<int> hitPosX;
+std::vector<int> hitPosY;
+int lastShipHitCounter{ 0 };
+int lastShipDirection{ 0 }; //0 = Unknown, 1 = Vertical, 2 = Horizontal
+int lastDirectionChecked{ 0 };
+
+void DiagonalStratAI(char boardAI[M][N], bool& shot, int& row, int& column)
+{ 
+    int j{ 0 };
+    while (!shot && j <= N)
+    {
+        int k = j;
+        for (int i = 0; i < M && k < N && !shot; i++)
+        {
+            if (boardAI[i][k] == BLANK)
+            {
+                row = i;
+                column = k;
+                shot = true;
+            }
+            k++;
+        }
+        j += 3;
+    }
+    j = 0;
+    while (!shot && j <= M)
+    {
+        int k = j;
+        for (int i = 0; i < N && k < M && !shot; i++)
+        {
+            if (boardAI[k][i] == BLANK)
+            {
+                row = k;
+                column = i;
+                shot = true;
+            }
+            k++;
+        }
+        j += 3;
+    }
+    if (!shot)
+    {
+        do //Random move as a last case cenario
+        {
+            row = randomRow(M, 0);
+            column = randomColumn(N, 0);
+        } while (boardAI[row][column] != BLANK);
+    }
+}
+
+void shootAI(char boardAI[M][N], bool shipsAI[M][N], int& numberOfShotsAI, int& numberOfHitsAI)
+{
+    int column{ 0 };
+    int row{ 0 };
+    bool shot{ false }; 
+
+    if(!hit) // Shoot diagonaly down the board until the AI hits something
+    {
+        DiagonalStratAI(boardAI, shot, row, column);
+    }
+    else  // Try to find the direction of the ship, and then follow that direction til there is no more ship
+    {
+        if(lastShipDirection == 0)
+        {
+            if(boardAI[hitPosY.at(0)][hitPosX.at(0) - 1] == BLANK && hitPosX.at(0) - 1 >= 0)
+            {
+                row = hitPosY.at(0);
+                column = hitPosX.at(0) - 1;
+                if(shipsAI[row][column] == true)
+                {
+                    lastShipDirection = 2;
+                }
+            }
+            else if (boardAI[hitPosY.at(0) - 1][hitPosX.at(0)] == BLANK && hitPosY.at(0) - 1 >= 0)
+            {
+                row = hitPosY.at(0) - 1;
+                column = hitPosX.at(0);
+                if (shipsAI[row][column] == true)
+                {
+                    lastShipDirection = 1;
+                }
+            }
+            else if (boardAI[hitPosY.at(0)][hitPosX.at(0) + 1] == BLANK && hitPosX.at(0) + 1 <= N)
+            {
+                row = hitPosY.at(0);
+                column = hitPosX.at(0) + 1;
+                if (shipsAI[row][column] == true)
+                {
+                    lastShipDirection = 2;
+                }
+            }
+            else if (boardAI[hitPosY.at(0) + 1][hitPosX.at(0)] == BLANK && hitPosY.at(0) + 1 <= M)
+            {
+                row = hitPosY.at(0) + 1;
+                column = hitPosX.at(0);
+                if (shipsAI[row][column] == true)
+                {
+                    lastShipDirection = 1;
+                }
+            }
+            else 
+            {
+                hit = false;
+                hitPosX.clear();
+                hitPosY.clear();
+                DiagonalStratAI(boardAI, shot, row, column);
+            }
+        }
+        else if(lastShipDirection == 1) // Vertical ship
+        {
+            if (boardAI[hitPosY.at(0) - 1][hitPosX.at(0)] == BLANK && hitPosY.at(0) - 1 >= 0)
+            {
+                row = hitPosY.at(0) - 1;
+                column = hitPosX.at(0);
+            }
+            else if (boardAI[hitPosY.at(hitPosY.size()-1) + 1][hitPosX.at(hitPosX.size()-1)] == BLANK && hitPosY.at(hitPosY.size() - 1) + 1 <= M)
+            {
+                row = hitPosY.at(hitPosY.size() - 1) + 1;
+                column = hitPosX.at(hitPosX.size() - 1);
+            }
+            else 
+            {
+                lastShipDirection = 0;
+                hit = false;
+                hitPosX.clear();
+                hitPosY.clear();
+                DiagonalStratAI(boardAI, shot, row, column);
+            }
+        }
+        else if(lastShipDirection == 2)
+        {
+            if (boardAI[hitPosY.at(0)][hitPosX.at(0) - 1] == BLANK && hitPosX.at(0) - 1 >= 0) //Check left
+            {
+                row = hitPosY.at(0);
+                column = hitPosX.at(0) - 1;
+            }
+            else if (boardAI[hitPosY.at(hitPosY.size() - 1)][hitPosX.at(hitPosX.size() - 1) + 1] == BLANK && hitPosX.at(hitPosX.size() - 1) + 1 <= N) //Check right
+            {
+                row = hitPosY.at(hitPosY.size() - 1);
+                column = hitPosX.at(hitPosX.size() - 1) + 1;
+            }
+            else 
+            {
+                lastShipDirection = 0;
+                hit = false;
+                hitPosX.clear();
+                hitPosY.clear();
+                DiagonalStratAI(boardAI, shot, row, column);
+            }
+        }
+    }
+
+
+    //Check and mark the co-ordinates
+    if (boardAI[row][column] == BLANK)
+    {
+        if (shipsAI[row][column] == true)
+        {
+            boardAI[row][column] = HIT;
+            lastShipHitCounter++;
+            
+            if(!hit)
+            {
+                hitPosX.push_back(column);
+                hitPosY.push_back(row);
+            }
+            else 
+            {
+                if(hitPosX.at(hitPosX.size()-1) < column)
+                {
+                    hitPosX.push_back(column);
+                }
+                else if(hitPosX.at(0) > column)
+                {
+                    hitPosX.insert(hitPosX.begin(), column);
+                }
+                if(hitPosY.at(hitPosY.size() - 1) < row)
+                {
+                    hitPosY.push_back(row);
+                }
+                else if(hitPosY.at(0) > row)
+                {
+                    hitPosY.insert(hitPosY.begin(), row);
+                }
+            }
+            hit = true;
+            numberOfHitsAI++;
+        }
+        else
+        {
+            boardAI[row][column] = MISS;
+        }
+    }
+    numberOfShotsAI++;
 }
 
 void Play()
@@ -571,7 +763,7 @@ void Play()
     int numberOfShots{ 0 }; //How many shots the player has used
 
     const int amountOfShips{ 3 }; //How many ships there are on the field 
-    const int amountOfShots{ amountOfShips*3 + ((M*N - amountOfShips * 3)/3) }; //How many shots the player has available
+    const int amountOfShots{ (amountOfShips*3 + (M*N - amountOfShips * 3)/3 ) }; //How many shots the player has available
 
     makeEmptyBoard(board, ships);
     makeBoard3(ships, amountOfShips);
@@ -615,7 +807,7 @@ void Play2()
     int numberOfShotsAI{ 0 };
 
     const int amountOfShips{ 3 }; //How many ships there are on the field 
-    const int amountOfShots{ amountOfShips * 3 + ((M * N - amountOfShips * 3) / 3) }; //How many shots the player has available
+    const int amountOfShots{ amountOfShips * 6 + ((M * N - amountOfShips * 6) / 3)}; //How many shots the player has available
 
     makeEmptyBoard(board, ships);
     makeEmptyBoard(boardAI, ships);
@@ -635,20 +827,29 @@ void Play2()
     {
         std::cout << "\n";
         shoot(board, ships, numberOfShots, numberOfHits);
+        shootAI(boardAI, shipsAI, numberOfShotsAI, numberOfHitsAI);
         system("cls");
         std::cout << "       AI\n    Ammo: " << amountOfShots - numberOfShotsAI << std::endl;
         printAIBoard(boardAI);
         std::cout << "     Player\n    Ammo: " << amountOfShots - numberOfShots << std::endl;
         printPlayerBoard(board);
-    } while (numberOfShots < amountOfShots && numberOfHits < amountOfShips * 3); //IMPORTANT: This only works when you run makeBoard3 and not makeBoard. Simply change "amountOfShips*3" to "amountOfShips" to make it work
+    } while (numberOfShots < amountOfShots && numberOfHits < amountOfShips * 3 && numberOfHitsAI < amountOfShips * 3);
 
-    if (numberOfHits >= amountOfShips * 3)//IMPORTANT: This only works when you run makeBoard3 and not makeBoard. Simply change "amountOfShips*3" to "amountOfShips" to make it work
+    if (numberOfHits >= amountOfShips * 3 && numberOfHitsAI < amountOfShips * 3)
     {
         std::cout << "\nYou won! You shot down all the ships!\n";
     }
+    else if(numberOfHitsAI >= amountOfShips * 3 && numberOfHits < amountOfShips * 3)
+    {
+        std::cout << "\nYou lost! The AI shot down all the ships first!\n";
+    }
+    else if(numberOfHitsAI >= amountOfShips * 3 && numberOfHits >= amountOfShips * 3)
+    {
+        std::cout << "\nIt's a tie! You both shot down all the ships at the same turn!\n";
+    }
     else
     {
-        std::cout << "\nYou lost! You are out of shots!\n";
+        std::cout << "\It's a tie! Both of you are out of shots!\n";
     }
     _getch();
 }
@@ -658,12 +859,18 @@ void Menu()
     system("cls");
     int userInput;;
     std::cout << "\n     |BATTLESHIPS|\n\n";
-    std::cout << " 1: Change the password\n 2: Play battleship\n 3: Quit\n\n";
+    std::cout << " 1: Change the password\n 2: Play battleship\n 3: Play battleship against AI\n 4: Quit\n\n";
     std::cout << " Select an option (1-3): ";
 
     do
     {
         std::cin >> userInput;
+        while(std::cin.fail())
+        { 
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+
         switch (userInput)
         {
         case 1:
@@ -671,13 +878,16 @@ void Menu()
             break;
         case 2:
             Play();
-            break;
+            break; 
         case 3:
+            Play2();
+            break;
+        case 4:
             exit(0);
         default:
             break;
         }
-    } while (userInput <= 0 && userInput > 3);
+    } while (userInput <= 0 && userInput > 4);
 }
 
 
@@ -687,7 +897,7 @@ int main()
     Login();
     
     srand(time(NULL));
-    ///Play2();
+
     while (true)
     {
         Menu();
