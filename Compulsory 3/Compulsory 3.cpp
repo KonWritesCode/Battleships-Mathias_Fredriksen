@@ -20,6 +20,7 @@ const char MISS = 'M';
 const char HIT = 'H';
 
 
+///////////////// PASSWORD //////////////////////
 std::string NewPassword()
 {
     std::string inputPassword = "A";
@@ -292,7 +293,8 @@ void Login()
     passwordFile.close();
 }
 
-//////////////////////////////////////////////////////
+///////////////// MAIN GAME //////////////////////
+
 int randomRow(int to, int from)
 {
     int row;
@@ -623,7 +625,7 @@ void shootAI(char boardAI[M][N], bool shipsAI[M][N], int& numberOfShotsAI, int& 
     {
         if(lastShipDirection == 0)
         {
-            if(boardAI[hitPosY.at(0)][hitPosX.at(0) - 1] == BLANK && hitPosX.at(0) - 1 >= 0)
+            if(boardAI[hitPosY.at(0)][hitPosX.at(0) - 1] == BLANK && hitPosX.at(0) - 1 >= 0) //Check left
             {
                 row = hitPosY.at(0);
                 column = hitPosX.at(0) - 1;
@@ -632,7 +634,7 @@ void shootAI(char boardAI[M][N], bool shipsAI[M][N], int& numberOfShotsAI, int& 
                     lastShipDirection = 2;
                 }
             }
-            else if (boardAI[hitPosY.at(0) - 1][hitPosX.at(0)] == BLANK && hitPosY.at(0) - 1 >= 0)
+            else if (boardAI[hitPosY.at(0) - 1][hitPosX.at(0)] == BLANK && hitPosY.at(0) - 1 >= 0) //Check up
             {
                 row = hitPosY.at(0) - 1;
                 column = hitPosX.at(0);
@@ -641,7 +643,7 @@ void shootAI(char boardAI[M][N], bool shipsAI[M][N], int& numberOfShotsAI, int& 
                     lastShipDirection = 1;
                 }
             }
-            else if (boardAI[hitPosY.at(0)][hitPosX.at(0) + 1] == BLANK && hitPosX.at(0) + 1 <= N)
+            else if (boardAI[hitPosY.at(0)][hitPosX.at(0) + 1] == BLANK && hitPosX.at(0) + 1 <= N) //Check right
             {
                 row = hitPosY.at(0);
                 column = hitPosX.at(0) + 1;
@@ -650,7 +652,7 @@ void shootAI(char boardAI[M][N], bool shipsAI[M][N], int& numberOfShotsAI, int& 
                     lastShipDirection = 2;
                 }
             }
-            else if (boardAI[hitPosY.at(0) + 1][hitPosX.at(0)] == BLANK && hitPosY.at(0) + 1 <= M)
+            else if (boardAI[hitPosY.at(0) + 1][hitPosX.at(0)] == BLANK && hitPosY.at(0) + 1 <= M) //Check down
             {
                 row = hitPosY.at(0) + 1;
                 column = hitPosX.at(0);
@@ -669,12 +671,12 @@ void shootAI(char boardAI[M][N], bool shipsAI[M][N], int& numberOfShotsAI, int& 
         }
         else if(lastShipDirection == 1) // Vertical ship
         {
-            if (boardAI[hitPosY.at(0) - 1][hitPosX.at(0)] == BLANK && hitPosY.at(0) - 1 >= 0)
+            if (boardAI[hitPosY.at(0) - 1][hitPosX.at(0)] == BLANK && hitPosY.at(0) - 1 >= 0) //Check up
             {
                 row = hitPosY.at(0) - 1;
                 column = hitPosX.at(0);
             }
-            else if (boardAI[hitPosY.at(hitPosY.size()-1) + 1][hitPosX.at(hitPosX.size()-1)] == BLANK && hitPosY.at(hitPosY.size() - 1) + 1 <= M)
+            else if (boardAI[hitPosY.at(hitPosY.size()-1) + 1][hitPosX.at(hitPosX.size()-1)] == BLANK && hitPosY.at(hitPosY.size() - 1) + 1 <= M) //Check down
             {
                 row = hitPosY.at(hitPosY.size() - 1) + 1;
                 column = hitPosX.at(hitPosX.size() - 1);
@@ -688,7 +690,7 @@ void shootAI(char boardAI[M][N], bool shipsAI[M][N], int& numberOfShotsAI, int& 
                 DiagonalStratAI(boardAI, shot, row, column);
             }
         }
-        else if(lastShipDirection == 2)
+        else if(lastShipDirection == 2) // Horizontal ship
         {
             if (boardAI[hitPosY.at(0)][hitPosX.at(0) - 1] == BLANK && hitPosX.at(0) - 1 >= 0) //Check left
             {
@@ -768,9 +770,6 @@ void Play()
     makeEmptyBoard(board, ships);
     makeBoard3(ships, amountOfShips);
 
-    //makeBoard(ships, amountOfShips);
-    //printBoard(ships);
-
     std::cout << std::endl;
     system("cls");
     std::cout << "Ammo: " << amountOfShots - numberOfShots << std::endl;
@@ -782,9 +781,9 @@ void Play()
         system("cls");
         std::cout << "Ammo: " << amountOfShots - numberOfShots << std::endl;
         printPlayerBoard(board);
-    } while (numberOfShots < amountOfShots && numberOfHits < amountOfShips*3); //IMPORTANT: This only works when you run makeBoard3 and not makeBoard. Simply change "amountOfShips*3" to "amountOfShips" to make it work
+    } while (numberOfShots < amountOfShots && numberOfHits < amountOfShips*3);
 
-    if(numberOfHits >= amountOfShips * 3)//IMPORTANT: This only works when you run makeBoard3 and not makeBoard. Simply change "amountOfShips*3" to "amountOfShips" to make it work
+    if(numberOfHits >= amountOfShips * 3)
     {
         std::cout << "\nYou won! You shot down all the ships!\n";
     } 
@@ -889,8 +888,6 @@ void Menu()
         }
     } while (userInput <= 0 && userInput > 4);
 }
-
-
 
 int main()
 {
